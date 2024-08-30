@@ -12,25 +12,47 @@ def extract_infos_from_pdf(pdf_file):
         page = doc.load_page(page_num)
         text = page.get_text()
 
-        found_emails = re.findall(
+        pattern_emails = re.findall(
             r'[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}', text)
-        found_jumins = re.findall(r'\d{6}-\d{7}', text)
-        found_credit_num = re.findall(
-            r'\b\d{4}[- ]?\d{4}[- ]?\d{4}[- ]?\d{4}\b', text)
-        found_cellphone_num = re.findall(r'\d{3}-\d{4}-\d{4}', text)
+        pattern_jumins = re.findall(r'\d{6}-\d{7}', text)
+        pattern_credit_num = re.findall(
+            r'^(\d{1,})(-(\d{1,})){1,}', text)
+        pattern_cellphone_num = re.findall(
+            r'(?:(010-\d{4})|(01[1|6|7|8|9]-\d{3,4}))-(\d{4})', text)
+        pattern_driver = re.findall(r'\d{2}-\d{2}-\d{6}-\d{2}', text)
+        pattern_passport = re.findall(r'([a-zA-Z]{1}|[a-zA-Z]{2})\d{8}', text)
+        pattern_account = re.findall(
+            r'^(\d{1,})(-(\d{1,})){1,}', text)
+        pattern_health = re.findall(r'[1257][-~.[:space:]][0-9]{10}', text)
+        # pattern_foreign = re.findall(r'([01][0-9]{5}[\s~-]+[1-8][0-9]{6}|[2-9][0-9]{5}[\s~-]+[1256][0-9]{6})', text)
 
-        for email in found_emails:
+        for email in pattern_emails:
             infos.append((os.path.basename(pdf_file),
                           page_num + 1, '이메일', email))
-        for jumin in found_jumins:
+        for jumin in pattern_jumins:
             infos.append((os.path.basename(pdf_file),
                           page_num + 1, '주민등록번호', jumin))
-        for credit in found_credit_num:
+        for credit in pattern_credit_num:
             infos.append((os.path.basename(pdf_file),
                           page_num + 1, '신용카드번호', credit))
-        for cellphone in found_cellphone_num:
+        for cellphone in pattern_cellphone_num:
             infos.append((os.path.basename(pdf_file),
                           page_num + 1, '휴대전화번호', cellphone))
+        for driver in pattern_driver:
+            infos.append((os.path.basename(pdf_file),
+                         page_num+1, '운전면허번호', driver))
+        for passport in pattern_passport:
+            infos.append((os.path.basename(pdf_file),
+                         page_num + 1, '여권번호', passport))
+        for account in pattern_account:
+            infos.append((os.path.basename(pdf_file),
+                         page_num + 1, '계좌번호', account))
+        for health in pattern_health:
+            infos.append((os.path.basename(pdf_file),
+                         page_num + 1, '건강보험번호', health))
+        # for foreign in pattern_foreign:
+        #     infos.append((os.path.basename(pdf_file),
+        #                  page_num + 1, '외국인등록번호', foreign))
 
     return infos
 
@@ -53,15 +75,16 @@ def save_infos_to_excel(emails, excel_file):
 
 
 def processing_folder(folder_path, excel_file):
-    all_emails = []
+    infos_list = []
 
-    for filename in os.listdir(folder_path):
-        if filename.lower().endswith('.pdf'):
-            pdf_file_path = os.path.join(folder_path, filename)
-            emails = extract_infos_from_pdf(pdf_file_path)
-            all_emails.extend(emails)
+    for root, _, files in os.walk(folder_path):
+        for filename in files:
+            if filename.lower().endswith('.pdf'):
+                pdf_file_path = os.path.join(root, filename)
+                infos = extract_infos_from_pdf(pdf_file_path)
+                infos_list.extend(infos)
 
-    save_infos_to_excel(all_emails, excel_file)
+    save_infos_to_excel(infos_list, excel_file)
 
 
 if __name__ == "__main__":

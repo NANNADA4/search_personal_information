@@ -1,40 +1,34 @@
 import re
 import openpyxl
 import os
-import win32com.client
+import win32com.client as win32
 
 
 def extract_infos_from_hwp(hwp_file):
     infos = []
     hwp = None
     try:
-        hwp = win32com.client.Dispatch("HWPFrame.HwpObject")
+        hwp = win32.gencache.EnsureDispatch("HWPFrame.HwpObject")
         hwp.RegisterModule("FilePathCheckDLL", "SecurityModule")
         hwp.Open(hwp_file)
         hwp.InitScan()
-        text = hwp.GetText()
 
         while True:
-            if text[0] == 0:
-                hwp.ReleaseScan()
+            state, text = hwp.GetText()
+            if state in [0, 1]:
                 break
             else:
-                found_emails = re.findall(
+                result_email = re.search(
                     r'[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}', text)
-
-                for email in found_emails:
+                if result_email:
+                    hwp.MovePos(201)
                     infos.append((os.path.basename(hwp_file),
-                                  hwp.key_indicator()[3], "이메일",  email))
+                                 hwp.KeyIndicator()[3], "이메일",  result_email.group()))
+        hwp.ReleaseScan()
+        hwp.Quit()
 
     except Exception as e:
         print(f"한글파일 에러발생 : {e}")
-    finally:
-        if hwp:
-            try:
-                hwp.ReleaseControl()
-            except:
-                pass
-
     return infos
 
 
