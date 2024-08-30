@@ -18,7 +18,7 @@ def extract_infos_from_pdf(pdf_file):
         pattern_credit_num = re.findall(
             r'^(\d{1,})(-(\d{1,})){1,}', text)
         pattern_cellphone_num = re.findall(
-            r'(?:(010-\d{4})|(01[1|6|7|8|9]-\d{3,4}))-(\d{4})', text)
+            r'(?:(010-\d{4})|(01[16789]-\d{3,4}))-(\d{4})', text)
         pattern_driver = re.findall(r'\d{2}-\d{2}-\d{6}-\d{2}', text)
         pattern_passport = re.findall(r'([a-zA-Z]{1}|[a-zA-Z]{2})\d{8}', text)
         pattern_account = re.findall(
@@ -57,7 +57,7 @@ def extract_infos_from_pdf(pdf_file):
     return infos
 
 
-def save_infos_to_excel(emails, excel_file):
+def save_infos_to_excel(infos, excel_file):
     if os.path.exists(excel_file):
         workbook = openpyxl.load_workbook(excel_file)
         sheet = workbook.active
@@ -68,8 +68,8 @@ def save_infos_to_excel(emails, excel_file):
     start_no = sheet.max_row if sheet.cell(
         row=1, column=1).value == "No." else 0
 
-    for i, email in enumerate(emails, start=start_no + 1):
-        sheet.append([i] + list(email))
+    for i, info in enumerate(infos, start=start_no + 1):
+        sheet.append([i] + list(info))
 
     workbook.save(excel_file)
 
