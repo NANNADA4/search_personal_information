@@ -16,14 +16,14 @@ def extract_infos_from_pdf(pdf_file):
             r'[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}', text)
         pattern_jumins = re.findall(r'\d{6}-\d{7}', text)
         pattern_credit_num = re.findall(
-            r'^(\d{1,})(-(\d{1,})){1,}', text)
+            r'\b\d{4}-\d{4}-\d{4}-\d{4}\b', text)
         pattern_cellphone_num = re.findall(
             r'(?:(010-\d{4})|(01[16789]-\d{3,4}))-(\d{4})', text)
         pattern_driver = re.findall(r'\d{2}-\d{2}-\d{6}-\d{2}', text)
         pattern_passport = re.findall(r'([a-zA-Z]{1}|[a-zA-Z]{2})\d{8}', text)
         pattern_account = re.findall(
             r'^(\d{1,})(-(\d{1,})){1,}', text)
-        pattern_health = re.findall(r'[1257][-~.[:space:]][0-9]{10}', text)
+        pattern_health = re.findall(r'[1257][-~.\s][0-9]{10}', text)
         # pattern_foreign = re.findall(r'([01][0-9]{5}[\s~-]+[1-8][0-9]{6}|[2-9][0-9]{5}[\s~-]+[1256][0-9]{6})', text)
 
         for email in pattern_emails:
