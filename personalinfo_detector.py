@@ -18,9 +18,9 @@ def extract_infos_from_pdf(pdf_file):
         pattern_credit_num = re.findall(
             r'\b\d{4}-\d{4}-\d{4}-\d{4}\b', text)
         pattern_cellphone_num = re.findall(
-            r'(?:(010-\d{4})|(01[16789]-\d{3,4}))-(\d{4})', text)
+            r'\b(010-\d{4}-\d{4}|01[16789]-\d{3,4}-\d{4})\b', text)
         pattern_driver = re.findall(r'\d{2}-\d{2}-\d{6}-\d{2}', text)
-        pattern_passport = re.findall(r'([a-zA-Z]{1}|[a-zA-Z]{2})\d{8}', text)
+        # pattern_passport = re.findall(r'([a-zA-Z]{1}|[a-zA-Z]{2})\d{8}', text)
         pattern_account = re.findall(
             r'^(\d{1,})(-(\d{1,})){1,}', text)
         pattern_health = re.findall(r'[1257][-~.\s][0-9]{10}', text)
@@ -41,9 +41,9 @@ def extract_infos_from_pdf(pdf_file):
         for driver in pattern_driver:
             infos.append((os.path.basename(pdf_file),
                          page_num+1, '운전면허번호', driver))
-        for passport in pattern_passport:
-            infos.append((os.path.basename(pdf_file),
-                         page_num + 1, '여권번호', passport))
+        # for passport in pattern_passport:
+        #     infos.append((os.path.basename(pdf_file),
+        #                  page_num + 1, '여권번호', passport))
         for account in pattern_account:
             infos.append((os.path.basename(pdf_file),
                          page_num + 1, '계좌번호', account))
