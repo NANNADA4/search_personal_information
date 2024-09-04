@@ -1,8 +1,8 @@
+import os
+
+
 from module.save_excel import save_infos_to_excel
 from module.extract_information import extract_infos_from_pdf, extract_infos_from_hwp
-
-
-import os
 
 
 def processing_folder(folder_path, excel_file):

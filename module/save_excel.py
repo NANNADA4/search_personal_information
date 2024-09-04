@@ -1,7 +1,5 @@
-import openpyxl
-
-
 import os
+import openpyxl
 
 
 def save_infos_to_excel(infos, excel_file):

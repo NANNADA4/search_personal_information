@@ -1,9 +1,7 @@
-import fitz
-
-
 import os
 import re
 import win32com.client as win32
+import fitz
 
 
 PATTERN_EMAILS = r'[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}'

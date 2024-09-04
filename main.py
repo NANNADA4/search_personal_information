@@ -1,5 +1,7 @@
+"""
+main 함수. 폴더를 순회하며 hwp, pdf, xlsx 파일에 한해 개인정보를 수집합니다
+"""
 from module.processing_folder import processing_folder
-"""main 함수"""
 
 if __name__ == "__main__":
     folder_path = input("작업할 폴더 경로를 입력하세요: ")
