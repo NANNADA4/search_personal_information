@@ -6,7 +6,7 @@ import os
 
 
 from module.save_excel import save_infos_to_excel
-from module.extract_information import extract_infos_from_pdf, extract_infos_from_hwp
+from module.extract_information import processing_pdf, processing_hwp, processing_xlsx
 
 
 def processing_folder(folder_path, excel_file):
@@ -17,11 +17,15 @@ def processing_folder(folder_path, excel_file):
         for filename in files:
             if filename.lower().endswith('.pdf'):
                 pdf_file_path = os.path.join('\\\\?\\', root, filename)
-                pdf_result = extract_infos_from_pdf(pdf_file_path)
+                pdf_result = processing_pdf(pdf_file_path)
                 infos_list.extend(pdf_result)
             elif filename.lower().endswith('.hwp'):
                 hwp_file_path = os.path.join('\\\\?\\', root, filename)
-                hwp_result = extract_infos_from_hwp(hwp_file_path)
+                hwp_result = processing_hwp(hwp_file_path)
                 infos_list.extend(hwp_result)
+            elif filename.lower().endswith('.xlsx'):
+                xlsx_file_path = os.path.join('\\\\?\\', root, filename)
+                xlsx_result = processing_xlsx(xlsx_file_path)
+                infos_list.extend(xlsx_result)
 
     save_infos_to_excel(infos_list, excel_file)

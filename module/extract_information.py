@@ -6,6 +6,7 @@ import os
 import re
 import win32com.client as win32
 import fitz
+from openpyxl import load_workbook
 
 
 PATTERN_EMAILS = r'[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}'
@@ -44,7 +45,7 @@ def _extract_personal_information(file, text, page_num):
     return infos
 
 
-def extract_infos_from_pdf(pdf_file):
+def processing_pdf(pdf_file):
     """pdf파일을 처리후, pdf_infos에 모든 결과를 리스트로 저장하여 return합니다"""
     doc = fitz.open(pdf_file)
     pdf_infos = []
@@ -55,8 +56,6 @@ def extract_infos_from_pdf(pdf_file):
         for info in _extract_personal_information(
                 pdf_file, text, page_num):
             pdf_infos.append(info)
-        # pdf_infos.append(_extract_personal_information(
-        #     pdf_file, text, page_num))
 
     return pdf_infos
 
@@ -82,7 +81,7 @@ def _extract_personal_information_hwp(hwp_file, text, hwp):
     return infos
 
 
-def extract_infos_from_hwp(hwp_file):
+def processing_hwp(hwp_file):
     """hwp 파일을 처리 후, hwp_infos에 모든 결과를 리스트로 저장하여 반환합니다"""
     hwp_infos = []
     hwp = None
@@ -109,3 +108,9 @@ def extract_infos_from_hwp(hwp_file):
             hwp.Quit()
 
     return hwp_infos
+
+
+def processing_xlsx(xlsx_file):
+    """xlsx 파일을 처리 후, xlsx_infos에 모든 결과를 리스트로 저장하여 반환합니다"""
+    xlsx_infos = []
+    wb = load_workbook(filename=xlsx_file)
