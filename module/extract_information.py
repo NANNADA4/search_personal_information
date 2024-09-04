@@ -1,3 +1,7 @@
+"""
+동일한 정규표현식을 사용하여 각 파일에 맞는 방법으로 개인정보를 추출합니다 
+"""
+
 import os
 import re
 import win32com.client as win32
@@ -93,7 +97,7 @@ def extract_infos_from_hwp(hwp_file):
             hwp_infos.extend(
                 _extract_personal_information_hwp(hwp_file, text, hwp))
 
-    except Exception as e:
+    except Exception as e:  # pylint: disable=W0703
         print(f"hwp 오류 발생 : {e}")
 
     finally:

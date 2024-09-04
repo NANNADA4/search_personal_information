@@ -1,3 +1,7 @@
+"""
+입력받은 폴더를 순회하면서 pdf, hwp, xlsx 파일의 경로를 구하고 extract_information으로 넘깁니다
+"""
+
 import os
 
 

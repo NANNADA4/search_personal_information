@@ -1,3 +1,7 @@
+"""
+전달받은 개인정보 리스트를 엑셀에 저장합니다
+"""
+
 import os
 import openpyxl
 
