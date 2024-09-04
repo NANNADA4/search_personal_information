@@ -5,6 +5,7 @@ import os
 
 
 def save_infos_to_excel(infos, excel_file):
+    """개인정보를 찾은 리스트를 엑셀 파일로 저장합니다."""
     if os.path.exists(excel_file):
         workbook = openpyxl.load_workbook(excel_file)
         sheet = workbook.active
