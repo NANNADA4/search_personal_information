@@ -52,8 +52,11 @@ def extract_infos_from_pdf(pdf_file):
     for page_num in range(len(doc)):
         page = doc.load_page(page_num)
         text = page.get_text()
-        pdf_infos.append(_extract_personal_information(
-            pdf_file, text, page_num))
+        for info in _extract_personal_information(
+                pdf_file, text, page_num):
+            pdf_infos.append(info)
+        # pdf_infos.append(_extract_personal_information(
+        #     pdf_file, text, page_num))
 
     return pdf_infos
 
