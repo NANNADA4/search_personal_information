@@ -3,6 +3,7 @@
 """
 
 import os
+from natsort import natsorted
 
 
 from module.save_excel import save_infos_to_excel
@@ -14,7 +15,7 @@ def processing_folder(folder_path, excel_file):
     infos_list = []
 
     for root, _, files in os.walk(folder_path):
-        for filename in files:
+        for filename in natsorted(files):
             if filename.lower().endswith('.pdf'):
                 pdf_file_path = os.path.join('\\\\?\\', root, filename)
                 pdf_result = processing_pdf(pdf_file_path)
