@@ -1,5 +1,5 @@
 """
-동일한 정규표현식을 사용하여 각 파일에 맞는 방법으로 개인정보를 추출합니다 
+동일한 정규표현식을 사용하여 각 파일에 맞는 방법으로 개인정보를 추출합니다
 """
 
 import os
@@ -25,40 +25,67 @@ PATTERNS = {
 }
 
 
-def _extract_personal_information(file, text, page_num=None, sheet_name=None):
+def _extract_personal_information(folder_path, file, text=None, page_num=None, sheet_name=None, error=None):
     """정규표현식으로 개인정보를 추출하여 리스트로 return합니다"""
     infos = []
+
+    blank = str(os.path.basename(folder_path)).find(' ')
+    under_bar = str(os.path.basename(folder_path)).find('_')
+    if blank != -1 and under_bar != -1:
+        cmt = str(os.path.basename(folder_path))[blank+1:under_bar]
+    elif blank != -1 and under_bar == -1:
+        cmt = str(os.path.basename(folder_path))[blank+1:]
+    else:
+        cmt = str(os.path.basename(folder_path))
+    relative_path = os.path.relpath(file, os.path.dirname(folder_path))
+
+    if text is None:
+        infos.append(
+            (cmt, relative_path.split(os.sep)[1],
+             os.path.basename(file), None, None, None, error))
+
+        return infos
 
     for info_type, pattern in PATTERNS.items():
         matches = re.findall(pattern, text)
         for match in matches:
+            # 위원회, 피감기관, 파일명, 페이지수, 개인정보 종류, 개인정보 검색 결과, 에러
             if page_num is not None:
                 infos.append(
-                    (os.path.basename(file), page_num + 1, info_type, match))
+                    (cmt, relative_path.split(os.sep)[1],
+                     os.path.basename(file), page_num + 1, info_type, match, None))
             elif sheet_name is not None:
                 infos.append(
-                    (os.path.basename(file), sheet_name, info_type, match))
+                    (cmt, relative_path.split(os.sep)[1],
+                     os.path.basename(file), sheet_name, info_type, match, None))
             else:
-                infos.append((os.path.basename(file), None, info_type, match))
+                infos.append((cmt, relative_path.split(
+                    os.sep)[1], os.path.basename(file), None, info_type, match, None))
 
     return infos
 
 
-def processing_pdf(pdf_file):
+def processing_pdf(folder_path, pdf_file):
     """pdf파일을 처리후, pdf_infos에 모든 결과를 리스트로 저장하여 return합니다"""
-    doc = fitz.open(pdf_file)
-    pdf_infos = []
+    try:
+        doc = fitz.open(pdf_file)
+        pdf_infos = []
 
-    for page_num in range(len(doc)):
-        page = doc.load_page(page_num)
-        text = page.get_text()
-        pdf_infos.extend(_extract_personal_information(
-            pdf_file, text, page_num))
+        for page_num in range(len(doc)):
+            page = doc.load_page(page_num)
+            text = page.get_text()
+            pdf_infos.extend(_extract_personal_information(folder_path,
+                                                           pdf_file, text=text, page_num=page_num))
+    except Exception as e:  # pylint: disable=W0703
+        error_log = str(e)
+        pdf_infos.extend(
+            _extract_personal_information(folder_path, pdf_file, error=error_log))
+        print(pdf_file, e)
 
     return pdf_infos
 
 
-def processing_hwp(hwp_file):
+def processing_hwp(folder_path, hwp_file):
     """hwp 파일을 처리 후, hwp_infos에 모든 결과를 리스트로 저장하여 반환합니다"""
     hwp_infos = []
     hwp = None
@@ -74,10 +101,13 @@ def processing_hwp(hwp_file):
             if state in [0, 1]:
                 break
             hwp_infos.extend(
-                _extract_personal_information(hwp_file, text))
+                _extract_personal_information(folder_path, hwp_file, text=text))
 
     except Exception as e:  # pylint: disable=W0703
-        print(f"hwp 오류 발생 : {e}")
+        error_log = str(e)
+        hwp_infos.extend(
+            _extract_personal_information(folder_path, hwp_file, error=error_log))
+        print(hwp_file, e)
 
     finally:
         if hwp:
@@ -87,19 +117,25 @@ def processing_hwp(hwp_file):
     return hwp_infos
 
 
-def processing_excel(excel_file):
+def processing_excel(folder_path, excel_file):
     """엑셀 파일을 처리 후, excel_infos에 모든 결과를 리스트로 저장하여 반환합니다"""
     excel_infos = []
-    wb = load_workbook(excel_file)
+    try:
+        wb = load_workbook(excel_file)
 
-    for sheet in wb.sheetnames:
-        ws = wb[sheet]
-        text = ""
-        for row in ws.iter_rows(values_only=True):
-            for cell in row:
-                if cell:
-                    text += str(cell) + " "
-        excel_infos.extend(_extract_personal_information(
-            excel_file, text, sheet_name=sheet))
+        for sheet in wb.sheetnames:
+            ws = wb[sheet]
+            text = ""
+            for row in ws.iter_rows(values_only=True):
+                for cell in row:
+                    if cell:
+                        text += str(cell) + " "
+            excel_infos.extend(_extract_personal_information(folder_path,
+                                                             excel_file, text=text, sheet_name=sheet))
+    except Exception as e:  # pylint: disable=W0703
+        error_log = str(e)
+        excel_infos.extend(
+            _extract_personal_information(folder_path, excel_file, error=error_log))
+        print(excel_file, e)
 
     return excel_infos
