@@ -24,6 +24,7 @@ def main():
         return main()
 
     processing_folder(input_path, output_path)
+    print("-"*24)
     print(f"{output_path}에 개인정보목록이 생성되었습니다.")
     print("\n~~~모든 작업이 완료되었습니다~~~")
 

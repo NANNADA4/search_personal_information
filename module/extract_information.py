@@ -95,10 +95,11 @@ def processing_hwp(folder_path, hwp_file):
 
         while True:
             state, text = hwp.GetText()
+            hwp.MovePos(201)
             if state in [0, 1]:
                 break
             hwp_infos.extend(
-                _extract_personal_information(folder_path, hwp_file, text=text))
+                _extract_personal_information(folder_path, hwp_file, text=text, page_num=hwp.KeyIndicator()[3]))
 
     except Exception as e:  # pylint: disable=W0703
         error_log = str(e)
