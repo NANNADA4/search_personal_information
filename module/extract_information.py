@@ -25,7 +25,8 @@ PATTERNS = {
 }
 
 
-def _extract_personal_information(folder_path, file, text=None, page_num=None, sheet_name=None, error=None):
+def _extract_personal_information(folder_path, file, text=None,
+                                  page_num=None, error=None):
     """정규표현식으로 개인정보를 추출하여 리스트로 return합니다"""
     infos = []
 
@@ -54,10 +55,6 @@ def _extract_personal_information(folder_path, file, text=None, page_num=None, s
                 infos.append(
                     (cmt, relative_path.split(os.sep)[1],
                      os.path.basename(file), page_num + 1, info_type, match, None))
-            elif sheet_name is not None:
-                infos.append(
-                    (cmt, relative_path.split(os.sep)[1],
-                     os.path.basename(file), sheet_name, info_type, match, None))
             else:
                 infos.append((cmt, relative_path.split(
                     os.sep)[1], os.path.basename(file), None, info_type, match, None))
@@ -130,8 +127,8 @@ def processing_excel(folder_path, excel_file):
                 for cell in row:
                     if cell:
                         text += str(cell) + " "
-            excel_infos.extend(_extract_personal_information(folder_path,
-                                                             excel_file, text=text, sheet_name=sheet))
+            excel_infos.extend(_extract_personal_information(folder_path, excel_file,
+                                                             text=text))
     except Exception as e:  # pylint: disable=W0703
         error_log = str(e)
         excel_infos.extend(
