@@ -21,6 +21,7 @@ jobs:
         pip install pymupdf
         pip install pywin32
         pip install openpyxl
+        pip install natsort
     - name: Analysing the code with pylint
       run: |
         pylint $(git ls-files '*.py')
