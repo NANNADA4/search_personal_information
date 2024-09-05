@@ -7,7 +7,7 @@ from natsort import natsorted
 
 
 from module.save_excel import save_infos_to_excel
-from module.extract_information import processing_pdf, processing_hwp, processing_xlsx
+from module.extract_information import processing_pdf, processing_hwp, processing_excel
 
 
 def processing_folder(folder_path, excel_file):
@@ -26,7 +26,7 @@ def processing_folder(folder_path, excel_file):
                 infos_list.extend(hwp_result)
             elif filename.lower().endswith('.xlsx'):
                 xlsx_file_path = os.path.join('\\\\?\\', root, filename)
-                xlsx_result = processing_xlsx(xlsx_file_path)
+                xlsx_result = processing_excel(xlsx_file_path)
                 infos_list.extend(xlsx_result)
 
     save_infos_to_excel(infos_list, excel_file)

@@ -16,31 +16,30 @@ PATTERN_CELLPHONE_NUMS = r'\b(010-\d{4}-\d{4}|01[16789]-\d{3,4}-\d{4})\b'
 PATTERN_DRIVER_NUMS = r'\d{2}-\d{2}-\d{6}-\d{2}'
 
 
-def _extract_personal_information(file, text, page_num):
+PATTERNS = {
+    '이메일': PATTERN_EMAILS,
+    '주민등록번호': PATTERN_JUMINS,
+    '신용카드번호': PATTERN_CREDIT_NUMS,
+    '휴대전화번호': PATTERN_CELLPHONE_NUMS,
+    '운전면허번호': PATTERN_DRIVER_NUMS
+}
+
+
+def _extract_personal_information(file, text, page_num=None, sheet_name=None):
     """정규표현식으로 개인정보를 추출하여 리스트로 return합니다"""
     infos = []
 
-    pattern_email = re.findall(PATTERN_EMAILS, text)
-    pattern_jumin = re.findall(PATTERN_JUMINS, text)
-    pattern_credit_num = re.findall(PATTERN_CREDIT_NUMS, text)
-    pattern_cellphone_num = re.findall(PATTERN_CELLPHONE_NUMS, text)
-    pattern_driver = re.findall(PATTERN_DRIVER_NUMS, text)
-
-    for email in pattern_email:
-        infos.append((os.path.basename(file),
-                      page_num + 1, '이메일', email))
-    for jumin in pattern_jumin:
-        infos.append((os.path.basename(file),
-                      page_num + 1, '주민등록번호', jumin))
-    for credit in pattern_credit_num:
-        infos.append((os.path.basename(file),
-                      page_num + 1, '신용카드번호', credit))
-    for cellphone in pattern_cellphone_num:
-        infos.append((os.path.basename(file),
-                      page_num + 1, '휴대전화번호', cellphone))
-    for driver in pattern_driver:
-        infos.append((os.path.basename(file),
-                     page_num+1, '운전면허번호', driver))
+    for info_type, pattern in PATTERNS.items():
+        matches = re.findall(pattern, text)
+        for match in matches:
+            if page_num is not None:
+                infos.append(
+                    (os.path.basename(file), page_num + 1, info_type, match))
+            elif sheet_name is not None:
+                infos.append(
+                    (os.path.basename(file), sheet_name, info_type, match))
+            else:
+                infos.append((os.path.basename(file), None, info_type, match))
 
     return infos
 
@@ -53,32 +52,10 @@ def processing_pdf(pdf_file):
     for page_num in range(len(doc)):
         page = doc.load_page(page_num)
         text = page.get_text()
-        for info in _extract_personal_information(
-                pdf_file, text, page_num):
-            pdf_infos.append(info)
+        pdf_infos.extend(_extract_personal_information(
+            pdf_file, text, page_num))
 
     return pdf_infos
-
-
-def _extract_personal_information_hwp(hwp_file, text, hwp):
-    """HWP 문서에서 개인 정보를 추출하여 리스트로 반환합니다"""
-    infos = []
-
-    patterns = {
-        '이메일': PATTERN_EMAILS,
-        '주민등록번호': PATTERN_JUMINS,
-        '신용카드번호': PATTERN_CREDIT_NUMS,
-        '휴대전화번호': PATTERN_CELLPHONE_NUMS,
-        '운전면허번호': PATTERN_DRIVER_NUMS
-    }
-
-    for info_type, pattern in patterns.items():
-        match = re.search(pattern, text)
-        if match:
-            infos.append((os.path.basename(hwp_file), hwp.KeyIndicator()[
-                         3], info_type, match.group()))
-
-    return infos
 
 
 def processing_hwp(hwp_file):
@@ -97,7 +74,7 @@ def processing_hwp(hwp_file):
             if state in [0, 1]:
                 break
             hwp_infos.extend(
-                _extract_personal_information_hwp(hwp_file, text, hwp))
+                _extract_personal_information(hwp_file, text))
 
     except Exception as e:  # pylint: disable=W0703
         print(f"hwp 오류 발생 : {e}")
@@ -110,7 +87,19 @@ def processing_hwp(hwp_file):
     return hwp_infos
 
 
-def processing_xlsx(xlsx_file):
-    """xlsx 파일을 처리 후, xlsx_infos에 모든 결과를 리스트로 저장하여 반환합니다"""
-    xlsx_infos = []
-    wb = load_workbook(filename=xlsx_file)
+def processing_excel(excel_file):
+    """엑셀 파일을 처리 후, excel_infos에 모든 결과를 리스트로 저장하여 반환합니다"""
+    excel_infos = []
+    wb = load_workbook(excel_file)
+
+    for sheet in wb.sheetnames:
+        ws = wb[sheet]
+        text = ""
+        for row in ws.iter_rows(values_only=True):
+            for cell in row:
+                if cell:
+                    text += str(cell) + " "
+        excel_infos.extend(_extract_personal_information(
+            excel_file, text, sheet_name=sheet))
+
+    return excel_infos
