@@ -64,10 +64,9 @@ def _extract_personal_information(folder_path, file, text=None,
 
 def processing_pdf(folder_path, pdf_file):
     """pdf파일을 처리후, pdf_infos에 모든 결과를 리스트로 저장하여 return합니다"""
+    pdf_infos = []
     try:
         doc = fitz.open(pdf_file)
-        pdf_infos = []
-
         for page_num in range(len(doc)):
             page = doc.load_page(page_num)
             text = page.get_text()
