@@ -14,7 +14,6 @@ from openpyxl import load_workbook
 PATTERN_EMAILS = r'[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}'
 PATTERN_JUMINS = r'\d{2}[01]\d[0123]\d- [1-4]\d{6}'
 PATTERN_CREDIT_NUMS = r'\b\d{4}-\d{4}-\d{4}-\d{4}\b'
-# PATTERN_CELLPHONE_NUMS = r'\b(010-\d{4}-\d{4}|01[16789]-\d{3,4}-\d{4})\b'
 PATTERN_DRIVER_NUMS = r'(?<!\+)\d{2}-\d{2}-\d{6}-\d{2}'
 
 
@@ -22,59 +21,56 @@ PATTERNS = {
     '이메일': PATTERN_EMAILS,
     '주민등록번호': PATTERN_JUMINS,
     '신용카드번호': PATTERN_CREDIT_NUMS,
-    # '휴대전화번호': PATTERN_CELLPHONE_NUMS,
     '운전면허번호': PATTERN_DRIVER_NUMS
 }
 
 
-def _extract_personal_information(folder_path, file, text=None,
-                                  page_num=None, error=None):
+def _extract_personal_information(folder_path, file, text=None, page_num=None, error=None):
     """정규표현식으로 개인정보를 추출하여 리스트로 return합니다"""
     infos = []
 
-    blank = str(os.path.basename(folder_path)).find(' ')
-    under_bar = str(os.path.basename(folder_path)).find('_')
-    if blank != -1 and under_bar != -1:
-        cmt = str(os.path.basename(folder_path))[blank+1:under_bar]
-    elif blank != -1 and under_bar == -1:
-        cmt = str(os.path.basename(folder_path))[blank+1:]
+    if os.path.basename(folder_path).find(' ') != -1:
+        if os.path.basename(folder_path).find('_') != -1:
+            cmt = os.path.basename(folder_path)[
+                os.path.basename(folder_path).find(' ') + 1:os.path.basename(folder_path).find('_')]
+        else:
+            cmt = os.path.basename(folder_path)[
+                os.path.basename(folder_path).find(' ') + 1:]
     else:
-        cmt = str(os.path.basename(folder_path))
+        cmt = os.path.basename(folder_path)
+
     relative_path = os.path.relpath(file, os.path.dirname(folder_path))
 
     if text is None:
-        infos.append(
-            (cmt, relative_path.split(os.sep)[1],
-             os.path.basename(file), None, None, None, error))
-
+        infos.append((
+            cmt, relative_path.split(os.sep)[1],
+            os.path.basename(file), None, None, None, error
+        ))
         return infos
 
     for info_type, pattern in PATTERNS.items():
         matches = re.findall(pattern, text)
         for match in matches:
-            # 위원회, 피감기관, 파일명, 페이지수, 개인정보 종류, 개인정보 검색 결과, 에러
-            if page_num is not None:
-                infos.append(
-                    (cmt, relative_path.split(os.sep)[1],
-                     os.path.basename(file), page_num + 1, info_type, match, None))
-            else:
-                infos.append((cmt, relative_path.split(
-                    os.sep)[1], os.path.basename(file), None, info_type, match, None))
+            infos.append((
+                cmt, relative_path.split(os.sep)[1],
+                os.path.basename(file), page_num +
+                1 if page_num is not None else None,
+                info_type, match, None
+            ))
 
     for word in text.split():
         try:
             number = phonenumbers.parse(word, None)
             if phonenumbers.is_valid_number(number):
                 phone_number = phonenumbers.format_number(
-                    number, phonenumbers.PhoneNumberFormat.INTERNATIONAL).replace(' ', '-')
-                if page_num is not None:
-                    infos.append(
-                        (cmt, relative_path.split(os.sep)[1],
-                            os.path.basename(file), page_num + 1, '전화번호', phone_number, None))
-                else:
-                    infos.append(
-                        (cmt, relative_path.split(os.sep)[1],
-                            os.path.basename(file), None, '전화번호', phone_number, None))
+                    number, phonenumbers.PhoneNumberFormat.INTERNATIONAL
+                ).replace(' ', '-')
+                infos.append((
+                    cmt, relative_path.split(os.sep)[1],
+                    os.path.basename(file), page_num +
+                    1 if page_num is not None else None,
+                    '전화번호', phone_number, None
+                ))
         except NumberParseException:
             continue
 
