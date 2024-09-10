@@ -69,8 +69,7 @@ def _extract_personal_information(folder_path, file, text=None, page_num=None, e
             number = phonenumbers.parse(word, None)
             if phonenumbers.is_valid_number(number):
                 phone_number = phonenumbers.format_number(
-                    number, phonenumbers.PhoneNumberFormat.INTERNATIONAL
-                ).replace(' ', '-')
+                    number, phonenumbers.PhoneNumberFormat.INTERNATIONAL)
                 infos.append((
                     cmt, relative_path.split(os.sep)[1],
                     os.path.basename(file), page_num +
