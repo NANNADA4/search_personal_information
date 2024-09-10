@@ -15,7 +15,7 @@ PATTERN_EMAILS = r'[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}'
 PATTERN_JUMINS = r'\d{2}[01]\d[0123]\d- [1-4]\d{6}'
 PATTERN_CREDIT_NUMS = r'\b\d{4}-\d{4}-\d{4}-\d{4}\b'
 # PATTERN_CELLPHONE_NUMS = r'\b(010-\d{4}-\d{4}|01[16789]-\d{3,4}-\d{4})\b'
-PATTERN_DRIVER_NUMS = r'\d{2}-\d{2}-\d{6}-\d{2}'
+PATTERN_DRIVER_NUMS = r'(?<!\+)\d{2}-\d{2}-\d{6}-\d{2}'
 
 
 PATTERNS = {
