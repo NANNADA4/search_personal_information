@@ -4,6 +4,7 @@
 
 import os
 import re
+import pathlib
 import win32com.client as win32
 import fitz
 import phonenumbers
@@ -50,7 +51,9 @@ def _extract_personal_information(folder_path, file, text=None, page_num=None, e
     if text is None:
         infos.append((
             cmt, relative_path.split(os.sep)[1],
-            os.path.basename(file), None, None, None, error
+            os.path.basename(file), pathlib.Path(
+                file).suffix.lstrip('.').lower(),
+            None, None, None, error
         ))
         return infos
 
@@ -59,8 +62,9 @@ def _extract_personal_information(folder_path, file, text=None, page_num=None, e
         for match in matches:
             infos.append((
                 cmt, relative_path.split(os.sep)[1],
-                os.path.basename(file), page_num +
-                1 if page_num is not None else None,
+                os.path.basename(file), pathlib.Path(
+                    file).suffix.lstrip('.').lower(),
+                page_num + 1 if page_num is not None else None,
                 info_type, match, None
             ))
 
@@ -72,8 +76,9 @@ def _extract_personal_information(folder_path, file, text=None, page_num=None, e
                     number, phonenumbers.PhoneNumberFormat.INTERNATIONAL)
                 infos.append((
                     cmt, relative_path.split(os.sep)[1],
-                    os.path.basename(file), page_num +
-                    1 if page_num is not None else None,
+                    os.path.basename(file), pathlib.Path(
+                        file).suffix.lstrip('.').lower(),
+                    page_num + 1 if page_num is not None else None,
                     '해외전화번호', phone_number, None
                 ))
         except NumberParseException:

@@ -15,7 +15,8 @@ def save_infos_to_excel(infos, excel_file):
     else:
         wb = Workbook()
         ws = wb.active
-        headers = ["연번", "위원회", "피감기관", "파일명", "페이지번호", "유형", "내용", "파일 이상"]
+        headers = ["연번", "위원회", "피감기관", "파일명",
+                   "확장자", "페이지번호", "유형", "내용", "파일 이상"]
         header_color = PatternFill(start_color='4f81bd',
                                    end_color='4f81bd', fill_type='solid')
 
