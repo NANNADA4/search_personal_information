@@ -24,9 +24,12 @@ def save_infos_to_excel(infos, excel_file):
             ws.cell(row=1, column=col_idx, value=header)
             ws.cell(row=1, column=col_idx).fill = header_color
     start_no = ws.max_row if ws.cell(
-        row=1, column=1).value == "No." else 0
+        row=1, column=1).value == "연번" else 0
 
-    for i, info in enumerate(infos, start=start_no + 1):
-        ws.append([i] + list(info))
+    for i in range(0, len(infos), 5000):
+        chunk = infos[i:i + 5000]
+        for j, info in enumerate(chunk, start=start_no + i + 1):
+            ws.append([j] + list(info))
+        wb.save(excel_file)
 
     wb.save(excel_file)
