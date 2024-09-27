@@ -9,6 +9,7 @@ from module.processing_folder import processing_folder
 
 def main():
     """개인정보를 추출합니다"""
+    print("-"*24)
     print("\n>>>>>>개인정보 추출기<<<<<<\n")
     print("-"*24)
     input_path = input("작업할 폴더 경로를 입력하세요(종료는 0을 입력) : ").strip()

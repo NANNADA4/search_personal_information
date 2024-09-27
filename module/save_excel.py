@@ -23,8 +23,7 @@ def save_infos_to_excel(infos, excel_file):
         for col_idx, header in enumerate(headers, start=1):
             ws.cell(row=1, column=col_idx, value=header)
             ws.cell(row=1, column=col_idx).fill = header_color
-    start_no = ws.max_row if ws.cell(
-        row=1, column=1).value == "연번" else 0
+    start_no = ws.max_row - 1
 
     for i in range(0, len(infos), 5000):
         chunk = infos[i:i + 5000]

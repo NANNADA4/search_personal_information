@@ -5,11 +5,11 @@
 import os
 import re
 import pathlib
+import pandas as pd
 import win32com.client as win32
 import fitz
 import phonenumbers
 from phonenumbers import NumberParseException
-from openpyxl import load_workbook
 
 
 PATTERN_EMAILS = r'[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}'
@@ -64,7 +64,8 @@ def _extract_personal_information(folder_path, file, text=None, page_num=None, e
                 cmt, relative_path.split(os.sep)[1],
                 os.path.basename(file), pathlib.Path(
                     file).suffix.lstrip('.').lower(),
-                page_num + 1 if page_num is not None else None,
+                page_num if isinstance(page_num, str) else (
+                    page_num + 1 if page_num is not None else None),
                 info_type, match, None
             ))
 
@@ -143,18 +144,24 @@ def processing_hwp(folder_path, hwp_file):
 def processing_excel(folder_path, excel_file):
     """엑셀 파일을 처리 후, excel_infos에 모든 결과를 리스트로 저장하여 반환합니다"""
     excel_infos = []
-    try:
-        wb = load_workbook(excel_file)
 
-        for sheet in wb.sheetnames:
-            ws = wb[sheet]
-            text = ""
-            for row in ws.iter_rows(values_only=True):
-                for cell in row:
-                    if cell:
-                        text += str(cell) + " "
-            excel_infos.extend(_extract_personal_information(folder_path, excel_file,
-                                                             text=text))
+    try:
+        xls = pd.ExcelFile(excel_file)
+
+        for sheet_name in xls.sheet_names:
+            df = pd.read_excel(xls, sheet_name=sheet_name)
+            for row_index, row in df.iterrows():
+                if row.isnull().all():
+                    continue
+                for col_index, cell in enumerate(row):
+                    if pd.isna(cell):
+                        continue
+                    xlsx_index = f"[{row_index + 1}, {col_index + 1}]"
+                    text = str(cell).strip()
+                    excel_infos.extend(
+                        _extract_personal_information(folder_path, excel_file,
+                                                      text=text, page_num=xlsx_index))
+
     except Exception as e:  # pylint: disable=W0703
         error_log = str(e)
         excel_infos.extend(
