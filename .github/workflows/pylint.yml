@@ -23,6 +23,7 @@ jobs:
         pip install openpyxl
         pip install natsort
         pip install phonenumbers
+        pip install pandas
     - name: Analysing the code with pylint
       run: |
         pylint $(git ls-files '*.py')
