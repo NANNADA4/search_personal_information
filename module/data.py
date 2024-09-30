@@ -3,6 +3,12 @@
 """
 
 
+PATTERN_GOOKMIN_ACCOUNTS = r'\b\d{6}-\d{2}-\d{6}\b'
+PATTERN_SHINHAN_ACCOUNTS = r'\b\d{3}-\d{3}-\d{6}\b'
+PATTERN_HANA_ACCOUNTS = r'\b\d{3}-\d{6}-\d{5}\b'
+PATTERN_WOORI_ACCOUNTS = r'\b\d{3}-\d{6}-\d{6}\b'
+PATTERN_KAKAO_ACCOUNTS = r'\b3333-\d{2,3}-\d{6}\b'
+PATTERN_NH_ACCOUNTS = r'\b\d{3}-\d{4}-\d{4}-\d{2}\b'
 PATTERN_EMAILS = r'[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}'
 PATTERN_JUMINS = r'\d{2}[01]\d[0123]\d- [1-4]\d{6}'
 PATTERN_CREDIT_NUMS = r'\b\d{4}-\d{4}-\d{4}-\d{4}\b'
@@ -19,5 +25,13 @@ PATTERNS = {
     '휴대전화번호': PATTERN_CELLPHONE_NUMS,
     '일반전화번호': PATTERN_PHONE_NUMS,
     '전국대표번호': PATTERN_REPRESENTATIVE_PHONE_NUMBERS,
-    '운전면허번호': PATTERN_DRIVER_NUMS
+    '운전면허번호': PATTERN_DRIVER_NUMS,
+    '계좌번호': [
+        PATTERN_GOOKMIN_ACCOUNTS,
+        PATTERN_SHINHAN_ACCOUNTS,
+        PATTERN_HANA_ACCOUNTS,
+        PATTERN_WOORI_ACCOUNTS,
+        PATTERN_KAKAO_ACCOUNTS,
+        PATTERN_NH_ACCOUNTS
+    ]
 }

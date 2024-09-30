@@ -5,20 +5,15 @@
 import os
 import re
 import pathlib
-import pandas as pd
-import win32com.client as win32
-import fitz
 import phonenumbers
 from phonenumbers import NumberParseException
 
 
-from module.patterns import PATTERNS
+from module.data import PATTERNS
 
 
-def _extract_personal_information(folder_path, file, text=None, page_num=None, error=None):
-    """정규표현식으로 개인정보를 추출하여 리스트로 return합니다"""
-    infos = []
-
+def _find_name(folder_path, file):
+    """위원회, 피감기관을 파일명에서 검색 후 추출합니다"""
     if os.path.basename(folder_path).find(' ') != -1:
         if os.path.basename(folder_path).find('_') != -1:
             cmt = os.path.basename(folder_path)[
@@ -29,29 +24,45 @@ def _extract_personal_information(folder_path, file, text=None, page_num=None, e
     else:
         cmt = os.path.basename(folder_path)
 
-    relative_path = os.path.relpath(file, os.path.dirname(folder_path))
+    org = os.path.relpath(file, os.path.dirname(folder_path)).split(os.sep)[1]
 
-    if text is None:
-        infos.append((
-            cmt, relative_path.split(os.sep)[1],
-            os.path.basename(file), pathlib.Path(
-                file).suffix.lstrip('.').lower(),
-            None, None, None, error
-        ))
-        return infos
+    return cmt, org
 
+
+def _extract_info_patterns(file, text, name, page_num, infos):
+    """정규표현식 패턴을 사용하여 개인정보 추출을 시도합니다"""
+    cmt, org = name
     for info_type, pattern in PATTERNS.items():
-        matches = re.findall(pattern, text)
-        for match in matches:
-            infos.append((
-                cmt, relative_path.split(os.sep)[1],
-                os.path.basename(file), pathlib.Path(
-                    file).suffix.lstrip('.').lower(),
-                page_num if isinstance(page_num, str) else (
-                    page_num + 1 if page_num is not None else None),
-                info_type, match, None
-            ))
+        if info_type == '계좌번호':
+            for account_pattern in pattern:
+                matches = re.findall(account_pattern, text)
+                for match in matches:
+                    infos.append((
+                        cmt, org,
+                        os.path.basename(file), pathlib.Path(
+                            file).suffix.lstrip('.').lower(),
+                        page_num if isinstance(page_num, str) else (
+                            page_num + 1 if page_num is not None else None),
+                        info_type, match, None
+                    ))
+        else:
+            matches = re.findall(pattern, text)
+            for match in matches:
+                infos.append((
+                    cmt, org,
+                    os.path.basename(file), pathlib.Path(
+                        file).suffix.lstrip('.').lower(),
+                    page_num if isinstance(page_num, str) else (
+                        page_num + 1 if page_num is not None else None),
+                    info_type, match, None
+                ))
 
+    return infos
+
+
+def _extract_info_phonenum(file, text, name, page_num, infos):
+    """phonenumbers 라이브러리로 국제전화번호를 추출합니다"""
+    cmt, org = name
     for word in text.split():
         try:
             number = phonenumbers.parse(word, None)
@@ -59,7 +70,7 @@ def _extract_personal_information(folder_path, file, text=None, page_num=None, e
                 phone_number = phonenumbers.format_number(
                     number, phonenumbers.PhoneNumberFormat.INTERNATIONAL)
                 infos.append((
-                    cmt, relative_path.split(os.sep)[1],
+                    cmt, org,
                     os.path.basename(file), pathlib.Path(
                         file).suffix.lstrip('.').lower(),
                     page_num + 1 if page_num is not None else None,
@@ -71,84 +82,25 @@ def _extract_personal_information(folder_path, file, text=None, page_num=None, e
     return infos
 
 
-def processing_pdf(folder_path, pdf_file):
-    """pdf파일을 처리후, pdf_infos에 모든 결과를 리스트로 저장하여 return합니다"""
-    pdf_infos = []
-    try:
-        doc = fitz.open(pdf_file)
-        for page_num in range(len(doc)):
-            page = doc.load_page(page_num)
-            text = page.get_text()
-            pdf_infos.extend(_extract_personal_information(folder_path,
-                                                           pdf_file, text=text, page_num=page_num))
-    except Exception as e:  # pylint: disable=W0703
-        error_log = str(e)
-        pdf_infos.extend(
-            _extract_personal_information(folder_path, pdf_file, error=error_log))
-        print(pdf_file, e)
+def extract_personal_information(folder_path, file, text=None, page_num=None, error=None):
+    """정규표현식으로 개인정보를 추출하여 리스트로 return합니다"""
+    infos = []
 
-    return pdf_infos
+    cmt, org = _find_name(folder_path, file)
 
+    if text is None:
+        infos.append((
+            cmt, org,
+            os.path.basename(file), pathlib.Path(
+                file).suffix.lstrip('.').lower(),
+            None, None, None, error
+        ))
+        return infos
 
-def processing_hwp(folder_path, hwp_file):
-    """hwp 파일을 처리 후, hwp_infos에 모든 결과를 리스트로 저장하여 반환합니다"""
-    hwp_infos = []
-    hwp = None
+    _extract_info_patterns(file, text, _find_name(
+        folder_path, file), page_num, infos)
 
-    try:
-        hwp = win32.gencache.EnsureDispatch("HWPFrame.HwpObject")
-        hwp.RegisterModule("FilePathCheckDLL", "SecurityModule")
-        hwp.Open(hwp_file)
-        hwp.InitScan()
+    _extract_info_phonenum(file, text, _find_name(
+        folder_path, file), page_num, infos)
 
-        while True:
-            state, text = hwp.GetText()
-            hwp.MovePos(201)
-            if state in [0, 1]:
-                break
-            hwp_infos.extend(
-                _extract_personal_information(folder_path, hwp_file, text=text,
-                                              page_num=hwp.KeyIndicator()[3]))
-
-    except Exception as e:  # pylint: disable=W0703
-        error_log = str(e)
-        hwp_infos.extend(
-            _extract_personal_information(folder_path, hwp_file, error=error_log))
-        print(hwp_file, e)
-
-    finally:
-        if hwp:
-            hwp.ReleaseScan()
-            hwp.Quit()
-
-    return hwp_infos
-
-
-def processing_excel(folder_path, excel_file):
-    """엑셀 파일을 처리 후, excel_infos에 모든 결과를 리스트로 저장하여 반환합니다"""
-    excel_infos = []
-
-    try:
-        xls = pd.ExcelFile(excel_file)
-
-        for sheet_name in xls.sheet_names:
-            df = pd.read_excel(xls, sheet_name=sheet_name)
-            for row_index, row in df.iterrows():
-                if row.isnull().all():
-                    continue
-                for col_index, cell in enumerate(row):
-                    if pd.isna(cell):
-                        continue
-                    xlsx_index = f"[{row_index + 1}, {col_index + 1}]"
-                    text = str(cell).strip()
-                    excel_infos.extend(
-                        _extract_personal_information(folder_path, excel_file,
-                                                      text=text, page_num=xlsx_index))
-
-    except Exception as e:  # pylint: disable=W0703
-        error_log = str(e)
-        excel_infos.extend(
-            _extract_personal_information(folder_path, excel_file, error=error_log))
-        print(excel_file, e)
-
-    return excel_infos
+    return infos

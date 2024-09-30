@@ -6,8 +6,8 @@ import os
 from natsort import natsorted
 
 
+from module.processing_file import processing_hwp, processing_pdf, processing_excel
 from module.save_excel import save_infos_to_excel
-from module.extract_information import processing_pdf, processing_hwp, processing_excel
 
 
 def processing_folder(folder_path, excel_file):
