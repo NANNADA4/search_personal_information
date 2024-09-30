@@ -1,6 +1,7 @@
 """파일별 구분하여 스크립트를 진행합니다"""
 
 
+import warnings
 import pandas as pd
 import fitz
 
@@ -67,6 +68,7 @@ def processing_excel(folder_path, excel_file):
     excel_infos = []
 
     try:
+        warnings.filterwarnings(action='ignore')
         xls = pd.ExcelFile(excel_file)
 
         for sheet_name in xls.sheet_names:
