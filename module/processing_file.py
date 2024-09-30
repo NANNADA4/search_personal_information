@@ -79,7 +79,7 @@ def processing_excel(folder_path, excel_file):
                 for col_index, cell in enumerate(row):
                     if pd.isna(cell):
                         continue
-                    xlsx_index = f"[{row_index + 1}, {col_index + 1}]"
+                    xlsx_index = f"[{row_index + 2}, {col_index + 1}]"
                     text = str(cell).strip()
                     excel_infos.extend(
                         extract_personal_information(folder_path, excel_file,

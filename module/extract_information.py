@@ -37,7 +37,18 @@ def _extract_info_patterns(file, text, name, page_num, infos):
             for account_pattern in pattern:
                 matches = re.findall(account_pattern, text)
                 for match in matches:
-                    print("  ▷ 개인정보 발견")
+                    infos.append((
+                        cmt, org,
+                        os.path.basename(file), pathlib.Path(
+                            file).suffix.lstrip('.').lower(),
+                        page_num if isinstance(page_num, str) else (
+                            page_num + 1 if page_num is not None else None),
+                        info_type, match, None
+                    ))
+        elif info_type == '신용카드번호':
+            for credit_pattern in pattern:
+                matches = re.findall(credit_pattern, text)
+                for match in matches:
                     infos.append((
                         cmt, org,
                         os.path.basename(file), pathlib.Path(
@@ -49,7 +60,6 @@ def _extract_info_patterns(file, text, name, page_num, infos):
         else:
             matches = re.findall(pattern, text)
             for match in matches:
-                print("  ▷ 개인정보 발견")
                 infos.append((
                     cmt, org,
                     os.path.basename(file), pathlib.Path(
@@ -76,7 +86,7 @@ def _extract_info_phonenum(file, text, name, page_num, infos):
                     os.path.basename(file), pathlib.Path(
                         file).suffix.lstrip('.').lower(),
                     page_num + 1 if page_num is not None else None,
-                    '해외전화번호', phone_number, None
+                    '전화번호', phone_number, None
                 ))
         except NumberParseException:
             continue
