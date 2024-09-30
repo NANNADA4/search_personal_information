@@ -37,6 +37,7 @@ def _extract_info_patterns(file, text, name, page_num, infos):
             for account_pattern in pattern:
                 matches = re.findall(account_pattern, text)
                 for match in matches:
+                    print("  ▷ 개인정보 발견")
                     infos.append((
                         cmt, org,
                         os.path.basename(file), pathlib.Path(
@@ -48,6 +49,7 @@ def _extract_info_patterns(file, text, name, page_num, infos):
         else:
             matches = re.findall(pattern, text)
             for match in matches:
+                print("  ▷ 개인정보 발견")
                 infos.append((
                     cmt, org,
                     os.path.basename(file), pathlib.Path(
