@@ -9,6 +9,7 @@ PATTERN_HANA_ACCOUNTS = r'\b\d{3}-\d{6}-\d{5}\b'
 PATTERN_WOORI_ACCOUNTS = r'\b\d{3}-\d{6}-\d{6}\b'
 PATTERN_KAKAO_ACCOUNTS = r'\b3333-\d{2,3}-\d{6}\b'
 PATTERN_NH_ACCOUNTS = r'\b\d{3}-\d{4}-\d{4}-\d{2}\b'
+PATTERN_NH_ACCOUNTS2 = r'\b\d{3}-\d{5}-\d{3}\b'
 PATTERN_EMAILS = r'[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}'
 PATTERN_JUMINS = r'\d{2}[01]\d[0123]\d- [1-4]\d{6}'
 PATTERN_CREDIT_NUMS = r'\b\d{4}-\d{4}-\d{4}-\d{4}\b'
@@ -36,7 +37,8 @@ PATTERNS = {
         PATTERN_HANA_ACCOUNTS,
         PATTERN_WOORI_ACCOUNTS,
         PATTERN_KAKAO_ACCOUNTS,
-        PATTERN_NH_ACCOUNTS
+        PATTERN_NH_ACCOUNTS,
+        PATTERN_NH_ACCOUNTS2
     ],
     '외국인등록번호': PATTERN_FOREIGN_NUMS,
     '여권번호': PATTERN_PASSPORT_NUMS,
