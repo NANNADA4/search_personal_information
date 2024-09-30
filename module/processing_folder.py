@@ -18,14 +18,17 @@ def processing_folder(folder_path, excel_file):
         for filename in natsorted(files):
             if filename.lower().endswith('.pdf'):
                 pdf_file_path = os.path.join('\\\\?\\', root, filename)
+                print(f"진행중 : {pdf_file_path}")
                 pdf_result = processing_pdf(folder_path, pdf_file_path)
                 infos_list.extend(pdf_result)
             elif filename.lower().endswith('.hwp') or filename.lower().endswith('.hwpx'):
                 hwp_file_path = os.path.join('\\\\?\\', root, filename)
+                print(f"진행중 : {hwp_file_path}")
                 hwp_result = processing_hwp(folder_path, hwp_file_path)
                 infos_list.extend(hwp_result)
             elif filename.lower().endswith('.xlsx'):
                 xlsx_file_path = os.path.join('\\\\?\\', root, filename)
+                print(f"진행중 : {xlsx_file_path}")
                 xlsx_result = processing_excel(folder_path, xlsx_file_path)
                 infos_list.extend(xlsx_result)
 
