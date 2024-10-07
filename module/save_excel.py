@@ -23,11 +23,10 @@ def save_infos_to_excel(infos, excel_file):
         for col_idx, header in enumerate(headers, start=1):
             ws.cell(row=1, column=col_idx, value=header)
             ws.cell(row=1, column=col_idx).fill = header_color
-    start_no = ws.max_row - 1
 
     for i in range(0, len(infos), 5000):
         chunk = infos[i:i + 5000]
-        for j, info in enumerate(chunk, start=start_no + i + 1):
+        for j, info in enumerate(chunk, start=ws.max_row + i):
             ws.append([j] + list(info))
         wb.save(excel_file)
 

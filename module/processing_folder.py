@@ -12,10 +12,10 @@ from module.save_excel import save_infos_to_excel
 
 def processing_folder(folder_path, excel_file):
     """폴더 내부를 순회하며, pdf, hwp, xlsx 파일을 찾아 개인정보를 찾습니다."""
-    infos_list = []
-
     for root, _, files in os.walk(folder_path):
+        infos_list = []
         for filename in natsorted(files):
+            infos_list = []
             if filename.lower().endswith('.pdf'):
                 pdf_file_path = os.path.join('\\\\?\\', root, filename)
                 print(f"진행중 : {pdf_file_path}")
@@ -31,5 +31,4 @@ def processing_folder(folder_path, excel_file):
                 print(f"진행중 : {xlsx_file_path}")
                 xlsx_result = processing_excel(folder_path, xlsx_file_path)
                 infos_list.extend(xlsx_result)
-
-    save_infos_to_excel(infos_list, excel_file)
+        save_infos_to_excel(infos_list, excel_file)
