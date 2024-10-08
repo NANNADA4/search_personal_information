@@ -36,6 +36,7 @@ def processing_hwp(folder_path, hwp_file):
 
     try:
         hwp = win32.gencache.EnsureDispatch("HWPFrame.HwpObject")
+        hwp.SetMessageBoxMode(0x00000020)
         hwp.RegisterModule("FilePathCheckDLL", "SecurityModule")
         hwp.Open(hwp_file, arg="versionwarning:False;suspendpassword:True")
         hwp.InitScan()
